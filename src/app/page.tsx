@@ -1586,6 +1586,35 @@ export default function Dashboard() {
           </p>
         </div>
 
+        {/* Creator Links: Buy Me A Coffee & Instagram */}
+        <div className="mt-2.5 mb-1.5 flex flex-wrap items-center justify-center gap-3 animate-fade-in">
+          {/* Buy Me A Coffee - Sleek Golden Theme */}
+          <a
+            href="https://buymeacoffee.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-amber-500/5 hover:bg-amber-500/15 border border-amber-500/20 hover:border-amber-500/35 text-amber-400 hover:text-amber-300 text-[10px] font-extrabold uppercase tracking-widest px-4 py-2 rounded-xl transition-all cursor-pointer shadow-lg shadow-amber-500/5 hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <span className="text-xs">☕</span>
+            <span>Buy Me A Coffee</span>
+          </a>
+
+          {/* Instagram - Sleek Pink/Instagram Gradient Theme */}
+          <a
+            href="https://www.instagram.com/ajaykc_?igsh=MTl5NzB3d21zd29tYQ%3D%3D&utm_source=qr"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-rose-500/5 hover:bg-rose-500/15 border border-rose-500/20 hover:border-rose-500/35 text-rose-400 hover:text-rose-300 text-[10px] font-extrabold uppercase tracking-widest px-4 py-2 rounded-xl transition-all cursor-pointer shadow-lg shadow-rose-500/5 hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.2">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+              <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+            </svg>
+            <span>Instagram</span>
+          </a>
+        </div>
+
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between w-full max-w-3xl gap-2 px-1">
           <p className="text-[10px] text-zinc-600 font-medium tracking-wide">
