@@ -1042,7 +1042,7 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-5xl font-extrabold tracking-tight text-zinc-100">
-              <span style={{ fontFamily: "'Baloo Chettan 2', sans-serif", fontWeight: 800 }}>തിരക്കുണ്ടോ.in</span>{' '}<span className="font-sans text-lg font-medium text-zinc-400 ml-1">/ Thirakkundo.in</span>
+              <span style={{ fontFamily: "'Baloo Chettan 2', sans-serif", fontWeight: 800 }}>തിരക്കുണ്ടോ</span><span className='text-sm tracking-wide'>.in</span>{' '}<span className="font-sans text-lg font-medium text-zinc-400 ml-1">/ Thirakkundo</span><span className='text-xs font-medium tracking-wide'>.in</span>
             </h1>
           
           </div>
