@@ -117,6 +117,29 @@ export default function Dashboard() {
   const recentReports = useAppSelector((state) => state.places.recentReports);
   const selectedPlaceId = useAppSelector((state) => state.ui.selectedPlaceId);
 
+  // Local state for tracking overall historical database report count
+  const [dbReportCount, setDbReportCount] = useState<number>(131); // Default to local mock catalog sum (42 + 89)
+
+  // Sync historical total report count from Supabase
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    
+    const fetchHistoricalCount = () => {
+      supabase
+        .from('reports')
+        .select('*', { count: 'exact', head: true })
+        .then(({ count, error }: any) => {
+          if (!error && count !== null) {
+            setDbReportCount(count);
+          }
+        });
+    };
+
+    fetchHistoricalCount();
+    const interval = setInterval(fetchHistoricalCount, 30000); // refresh every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
+
   // Load persisted custom user reports from localStorage on mount (client-side only)
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -371,6 +394,27 @@ export default function Dashboard() {
     return [...seedPlaces].sort((a, b) => getMinutes(a.lastUpdated) - getMinutes(b.lastUpdated))[0];
   }, [places]);
 
+  const totalSubmissions = useMemo(() => {
+    // Sum up the overall historical count + any active custom local reports not yet in db
+    const activeLocalCustomReportsCount = places.filter(
+      (p) => p.category === 'bevco' && p.reportedAtTimestamp && p.id.startsWith('custom-')
+    ).length;
+    return dbReportCount + activeLocalCustomReportsCount;
+  }, [places, dbReportCount]);
+
+  const crowdStats = useMemo(() => {
+    const active = places.filter(
+      (p) => p.category === 'bevco' && p.reportedAtTimestamp
+    );
+    const busyPacked = active.filter(p => p.crowdStatus === 'busy' || p.crowdStatus === 'packed').length;
+    const emptyModerate = active.filter(p => p.crowdStatus === 'empty' || p.crowdStatus === 'moderate').length;
+    return {
+      activeCount: active.length,
+      busyPacked,
+      emptyModerate,
+    };
+  }, [places]);
+
   const selectedPlace = useMemo(() => {
     if (!selectedPlaceId) return null;
 
@@ -530,6 +574,9 @@ export default function Dashboard() {
   const [detailPlace, setDetailPlace] = useState<(typeof places)[0] | null>(null);
   const [activeFormTab, setActiveFormTab] = useState<'availability' | 'reporting'>('availability');
   const [refreshTick, setRefreshTick] = useState<number>(0);
+  const [showCoffeeModal, setShowCoffeeModal] = useState<boolean>(false);
+  const [selectedDonation, setSelectedDonation] = useState<number | 'custom'>(60);
+  const [customAmount, setCustomAmount] = useState<string>('');
 
   // Local state for pincode and outlet name inputs
   const [reportOutletName, setReportOutletName] = useState<string>('');
@@ -979,7 +1026,7 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-5xl font-extrabold tracking-tight text-zinc-100">
-              <span style={{ fontFamily: "'Baloo Chettan 2', sans-serif", fontWeight: 800 }}>തിരക്കുണ്ടോ?</span>{' '}<span className="font-sans text-lg font-medium text-zinc-400 ml-1">/ Thirakkundo?</span>
+              <span style={{ fontFamily: "'Baloo Chettan 2', sans-serif", fontWeight: 800 }}>തിരക്കുണ്ടോ.in</span>{' '}<span className="font-sans text-lg font-medium text-zinc-400 ml-1">/ Thirakkundo.in</span>
             </h1>
           
           </div>
@@ -1244,8 +1291,11 @@ export default function Dashboard() {
                       );
                     })()
                   ) : (
-                    <div className="py-8 bg-zinc-900/10 border border-zinc-850 rounded-2xl p-6 text-center flex flex-col gap-1.5 items-center justify-center text-zinc-500">
-                      <span className="text-xl">📍</span>
+                    <div className="py-8 bg-zinc-900/10 border border-zinc-850 rounded-2xl p-6 text-center flex flex-col gap-2 items-center justify-center text-zinc-500 animate-fade-in">
+                      <svg className="w-6 h-6 text-zinc-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
                       <p className="text-xs font-bold text-zinc-400">No Outlet Selected</p>
                       <p className="text-[10px] text-zinc-500 leading-normal max-w-[240px] mx-auto">
                         Please search and select a BEVCO shop using the "Find Outlets" section above to instantly view its live status.
@@ -1482,7 +1532,7 @@ export default function Dashboard() {
                   Real-time crowd-sourced status indicators submitted by citizens.
                 </p>
               </div>
-              <span className="text-xs font-bold text-zinc-400 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-xl uppercase tracking-wider shrink-0">
+              <span className="text-[10px] font-medium text-zinc-400 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-xl  tracking-wider shrink-0">
                 {reportedPlaces.length} Active Update{reportedPlaces.length !== 1 ? 's' : ''}
               </span>
             </div>
@@ -1570,6 +1620,47 @@ export default function Dashboard() {
         );
       })()}
 
+      {/* Live Community Statistics Banner */}
+      <div className="w-full bg-zinc-950/40 border border-zinc-900 rounded-2xl py-3 px-5 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8 shadow-2xl relative overflow-hidden animate-fade-in">
+        
+        {/* Banner Left: Label */}
+        <div className="flex items-center">
+          <div>
+            <h4 className="text-[10px] font-medium tracking-wider text-white">Live Telemetry</h4>
+            <p className="text-[8.5px] text-zinc-500 font-medium mt-0.5">Real-time citizen-submitted crowd reports.</p>
+          </div>
+        </div>
+
+        {/* Banner Right: Key Data Indicators Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8 w-full md:w-auto shrink-0 pt-3 md:pt-0 border-t border-zinc-900 md:border-t-0 justify-items-center sm:justify-items-start">
+          
+          {/* Stat 1 */}
+          <div className="flex flex-col items-center sm:items-start">
+            <span className="text-[7.5px] font-bold text-zinc-500 uppercase tracking-widest">Total Reports</span>
+            <span className="text-xs font-black text-zinc-300 mt-0.5 font-mono">{totalSubmissions}</span>
+          </div>
+
+          {/* Stat 2 */}
+          <div className="flex flex-col items-center sm:items-start">
+            <span className="text-[7.5px] font-bold text-zinc-500 uppercase tracking-widest">Active Outlets</span>
+            <span className="text-xs font-black text-zinc-300 mt-0.5 font-mono">{crowdStats.activeCount}</span>
+          </div>
+
+          {/* Stat 3 */}
+          <div className="flex flex-col items-center sm:items-start">
+            <span className="text-[7.5px] font-bold text-emerald-500/80 uppercase tracking-widest">Low Crowd</span>
+            <span className="text-xs font-black text-emerald-400 mt-0.5 font-mono">{crowdStats.emptyModerate}</span>
+          </div>
+
+          {/* Stat 4 */}
+          <div className="flex flex-col items-center sm:items-start">
+            <span className="text-[7.5px] font-bold text-amber-500/80 uppercase tracking-widest">Heavy Crowd</span>
+            <span className="text-xs font-black text-amber-400 mt-0.5 font-mono">{crowdStats.busyPacked}</span>
+          </div>
+
+        </div>
+      </div>
+
       {/* Footer */}
       <footer className="w-full mt-8 border-t border-zinc-800/60 pt-6 pb-4 flex flex-col items-center gap-3">
 
@@ -1587,24 +1678,23 @@ export default function Dashboard() {
         </div>
 
         {/* Creator Links: Buy Me A Coffee & Instagram */}
-        <div className="mt-2.5 mb-1.5 flex flex-wrap items-center justify-center gap-3 animate-fade-in">
-          {/* Buy Me A Coffee - Sleek Golden Theme */}
-          <a
-            href="https://buymeacoffee.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-amber-500/5 hover:bg-amber-500/15 border border-amber-500/20 hover:border-amber-500/35 text-amber-400 hover:text-amber-300 text-[10px] font-extrabold uppercase tracking-widest px-4 py-2 rounded-xl transition-all cursor-pointer shadow-lg shadow-amber-500/5 hover:scale-[1.02] active:scale-[0.98]"
+        <div className="mt-3 mb-1 flex flex-wrap items-center justify-center gap-3 animate-fade-in">
+          {/* Buy Me A Coffee - Simple Minimal Style Button */}
+          <button
+            type="button"
+            onClick={() => setShowCoffeeModal(true)}
+            className="inline-flex items-center gap-1.5 bg-zinc-900/30 hover:bg-zinc-900/60 border border-zinc-800/80 hover:border-zinc-700/60 text-zinc-400 hover:text-amber-400 text-[10px] font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-[0.98] outline-none"
           >
-            <span className="text-xs">☕</span>
+            <span className="text-[11px]">☕</span>
             <span>Buy Me A Coffee</span>
-          </a>
+          </button>
 
-          {/* Instagram - Sleek Pink/Instagram Gradient Theme */}
+          {/* Instagram - Simple Minimal Style */}
           <a
             href="https://www.instagram.com/ajaykc_?igsh=MTl5NzB3d21zd29tYQ%3D%3D&utm_source=qr"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-rose-500/5 hover:bg-rose-500/15 border border-rose-500/20 hover:border-rose-500/35 text-rose-400 hover:text-rose-300 text-[10px] font-extrabold uppercase tracking-widest px-4 py-2 rounded-xl transition-all cursor-pointer shadow-lg shadow-rose-500/5 hover:scale-[1.02] active:scale-[0.98]"
+            className="inline-flex items-center gap-1.5 bg-zinc-900/30 hover:bg-zinc-900/60 border border-zinc-800/80 hover:border-zinc-700/60 text-zinc-400 hover:text-rose-400 text-[10px] font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-[0.98]"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.2">
               <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
@@ -1728,6 +1818,211 @@ export default function Dashboard() {
                     <span className="text-red-500/60">Expired</span>
                   )}
                 </div>
+              </div>
+            </div>
+          </>
+        );
+      })()}
+
+      {/* Buy Me A Coffee (UPI Donation) Modal */}
+      {showCoffeeModal && (() => {
+        const donationOptions = [
+          { id: 30, emoji: '🍌', label: 'Pazhampori', desc: 'Chaya break fuel and local gossip.', amount: 30 },
+          { id: 60, emoji: '🍳', label: 'Porotta Set', desc: 'Beef is extra. Salna adjustment.', amount: 60 },
+          { id: 150, emoji: '🍗', label: 'Biriyani', desc: 'Code will not compile hungry.', amount: 150 },
+          { id: 250, emoji: '🍖', label: 'Kuzhi Mandi', desc: 'Weekend server fuel. Food coma.', amount: 250 },
+          { id: 500, emoji: '🍽️', label: 'Full Feast', desc: 'Sugar daddy mode. Sadya vibes.', amount: 500 },
+        ];
+
+        const donateAmount = selectedDonation === 'custom' ? Number(customAmount) || 0 : selectedDonation;
+        const upiId = "kcajay72@oksbi";
+        const name = "Ajay K C";
+        const note = "Support Thirakkundo";
+        const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${donateAmount}&cu=INR&tn=${encodeURIComponent(note)}`;
+        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&color=212-212-216&bgcolor=9-9-11&data=${encodeURIComponent(upiUrl)}`;
+
+        const handleDonateSubmit = () => {
+          if (donateAmount <= 0) return;
+          window.location.href = upiUrl;
+        };
+
+        return (
+          <>
+            {/* Glassmorphic Backdrop */}
+            <div
+              className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
+              onClick={() => setShowCoffeeModal(false)}
+            >
+              {/* Premium Wide Modal Panel */}
+              <div
+                className="w-full max-w-2xl bg-zinc-950/95 border border-white/5 rounded-3xl shadow-2xl p-5 md:p-6 flex flex-col gap-4 relative animate-scale-in my-8 max-h-[95vh] overflow-y-auto custom-scrollbar overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Subtle Top Accent */}
+                <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-zinc-700/40 via-zinc-800/20 to-transparent" />
+
+                {/* Header */}
+                <div className="flex items-center justify-between pb-2 border-b border-zinc-900/60">
+                  <div className="flex items-center gap-2.5">
+                    <h3 className="text-base font-bold text-zinc-100 tracking-tight">
+                      Support Thirakkundo
+                    </h3>
+                  </div>
+                  {/* Close Button */}
+                  <button
+                    onClick={() => setShowCoffeeModal(false)}
+                    className="text-zinc-500 hover:text-zinc-300 w-7 h-7 rounded-full bg-zinc-900 hover:bg-zinc-800 flex items-center justify-center text-[10px] font-medium cursor-pointer transition-colors border border-white/5"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* Content Layout: 2 Columns on desktop, stacked on mobile */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+                  
+                  {/* Left Column: Description & Options Selector */}
+                  <div className="md:col-span-7 flex flex-col gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <div className="bg-zinc-900/40 border border-zinc-800/80 text-zinc-400 text-[9px] font-medium py-2 px-3 rounded-xl flex items-center gap-1.5 leading-none w-fit">
+                        <svg className="w-3 h-3 shrink-0 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Every contribution helps keep the service running.</span>
+                      </div>
+                    </div>
+
+                    {/* Options List */}
+                    <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto pr-1 custom-scrollbar">
+                      {donationOptions.map((opt) => {
+                        const isSelected = selectedDonation === opt.amount;
+                        return (
+                          <div
+                            key={opt.id}
+                            onClick={() => setSelectedDonation(opt.amount)}
+                            className={`flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-zinc-900/50 border-zinc-700 shadow-inner'
+                                : 'bg-zinc-900/20 border-white/5 hover:border-zinc-800'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              {/* Custom Radio Button */}
+                              <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 ${
+                                isSelected ? 'border-zinc-400' : 'border-zinc-800'
+                              }`}>
+                                {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-zinc-200" />}
+                              </div>
+                              
+                              <span className="text-base shrink-0">{opt.emoji}</span>
+                              <div className="min-w-0">
+                                <h4 className="text-[11px] font-semibold text-zinc-200">{opt.label}</h4>
+                                <p className="text-[9.5px] text-zinc-500 truncate leading-normal font-normal">{opt.desc}</p>
+                              </div>
+                            </div>
+                            <span className="text-[11px] font-semibold text-zinc-200 shrink-0 font-mono">₹{opt.amount}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Custom Option - Fixed at Bottom */}
+                    <div
+                      onClick={() => setSelectedDonation('custom')}
+                      className={`flex flex-col gap-1.5 p-2.5 rounded-xl border transition-all cursor-pointer mt-1 ${
+                        selectedDonation === 'custom'
+                          ? 'bg-zinc-900/50 border-zinc-700'
+                          : 'bg-zinc-900/20 border-white/5 hover:border-zinc-800'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 ${
+                          selectedDonation === 'custom' ? 'border-zinc-400' : 'border-zinc-800'
+                        }`}>
+                          {selectedDonation === 'custom' && <div className="w-1.5 h-1.5 rounded-full bg-zinc-200" />}
+                        </div>
+                        <span className="text-[11px] font-semibold text-zinc-200">Enter custom amount</span>
+                      </div>
+
+                      {selectedDonation === 'custom' && (
+                        <div className="relative mt-0.5 flex items-center">
+                          <span className="absolute left-2.5 text-[10px] font-medium text-zinc-500">₹</span>
+                          <input
+                            type="number"
+                            value={customAmount}
+                            onChange={(e) => setCustomAmount(e.target.value)}
+                            placeholder="Amount"
+                            className="w-full bg-zinc-950 border border-zinc-900 focus:border-zinc-700 rounded-lg py-1.5 pl-6 pr-2 text-[10px] text-zinc-200 font-mono font-medium outline-none"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right Column: Checkout Details & Action Trigger */}
+                  <div className="md:col-span-5 flex flex-col gap-3.5 bg-zinc-900/10 border border-white/5 p-3.5 md:p-4 rounded-2xl font-normal">
+                    <h4 className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
+                      Payment Checkout
+                    </h4>
+
+                    {/* QR Code and Scan info - Beautiful row layout for perfect mobile & desktop space utilization */}
+                    {donateAmount > 0 ? (
+                      <div className="flex flex-row items-center gap-3.5 py-1">
+                        {/* Compact QR Code (Always displayed, scannable, muted zinc-200) */}
+                        <div className="bg-zinc-950 p-1.5 rounded-xl border border-zinc-900 shadow-inner shrink-0">
+                          <img
+                            src={qrCodeUrl}
+                            alt="UPI QR Code"
+                            className="w-16 h-16 rounded-lg shrink-0"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-[10.5px] font-semibold text-zinc-300">Scan to pay with UPI</h4>
+                          <p className="text-[9px] text-zinc-500 leading-normal mt-0.5 font-normal">
+                            Works on GPay, PhonePe, Paytm, etc.
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-row items-center gap-3 py-4 text-left">
+                        <span className="text-xl opacity-40 shrink-0">☕</span>
+                        <p className="text-[9.5px] text-zinc-500 font-normal">
+                          Select an amount to generate UPI scan code.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* UPI Details Card (Always visible when amount is selected, highly compact) */}
+                    {donateAmount > 0 && (
+                      <div className="bg-zinc-950/60 border border-zinc-900 px-3 py-2 rounded-xl w-full flex items-center justify-between">
+                        <span className="text-[8.5px] uppercase tracking-wider text-zinc-500 font-semibold">UPI ID</span>
+                        <span className="text-[9px] font-mono text-zinc-300 font-semibold">{upiId}</span>
+                      </div>
+                    )}
+
+                    {/* Minimalist Matte White Checkout Button */}
+                    <button
+                      type="button"
+                      disabled={donateAmount <= 0}
+                      onClick={handleDonateSubmit}
+                      className="w-full py-2.5 px-4 bg-zinc-100 hover:bg-zinc-200 disabled:bg-zinc-900 disabled:text-zinc-700 disabled:cursor-not-allowed text-zinc-950 font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all shadow-[0_4px_16px_rgba(255,255,255,0.05)] hover:scale-[1.01] active:scale-[0.99] cursor-pointer flex items-center justify-between"
+                    >
+                      <span className="font-bold">Pay ₹{donateAmount}</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[7.5px] text-zinc-950/70 font-semibold">gpay / upi</span>
+                        <svg className="w-3 h-3 text-zinc-950" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </button>
+
+                    <p className="text-[8.5px] text-zinc-600 text-center tracking-wider font-semibold">
+                      Thank you! You keep Thirakkundo running.
+                    </p>
+                  </div>
+
+                </div>
+
               </div>
             </div>
           </>
