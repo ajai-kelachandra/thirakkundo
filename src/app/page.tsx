@@ -578,6 +578,22 @@ export default function Dashboard() {
   const [selectedDonation, setSelectedDonation] = useState<number | 'custom'>(60);
   const [customAmount, setCustomAmount] = useState<string>('');
 
+  // Disable background scrolling when any modal is open
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (showCoffeeModal || detailPlace) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        document.body.style.overflow = '';
+      }
+    };
+  }, [showCoffeeModal, detailPlace]);
+
   // Local state for pincode and outlet name inputs
   const [reportOutletName, setReportOutletName] = useState<string>('');
   const [reportPincode, setReportPincode] = useState<string>('');
