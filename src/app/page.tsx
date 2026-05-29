@@ -1487,8 +1487,8 @@ export default function Dashboard() {
               </span>
             </div>
 
-            {/* Grid display layout (Spans 1 to 4 cols depending on width to keep boxes wide and proportional) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {/* Grid display layout (Spans 3 cols on mobile, and 2-4 cols on desktop to keep boxes wide and proportional) */}
+            <div className="grid grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-5">
               {reportedPlaces.map((place) => {
                 const minutesAgo = place.reportedAtTimestamp
                   ? Math.floor((Date.now() - place.reportedAtTimestamp) / 60000)
@@ -1509,54 +1509,54 @@ export default function Dashboard() {
                 return (
                   <div
                     key={place.id}
-                    className="w-full bg-zinc-950/85 border border-zinc-900 rounded-2xl p-4.5 flex flex-col justify-between transition-all hover:border-zinc-800/80 shadow-2xl relative group"
+                    onClick={() => {
+                      dispatch(setSelectedPlaceId(place.id));
+                      setDetailPlace(place);
+                    }}
+                    className="w-full bg-zinc-950/85 border border-zinc-900 rounded-xl sm:rounded-2xl p-2.5 sm:p-4.5 flex flex-col justify-between transition-all hover:border-zinc-800/80 shadow-2xl relative group cursor-pointer active:scale-[0.98]"
                   >
                     {/* Top row: Title (Outlet name) and active status dot */}
-                    <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start justify-between gap-1 sm:gap-2">
                       <div className="min-w-0">
-                        <h4 className="text-sm font-bold text-zinc-100 group-hover:text-white transition-colors tracking-tight">
+                        <h4 className="text-[10px] sm:text-sm font-bold text-zinc-100 group-hover:text-white transition-colors tracking-tight line-clamp-1">
                           {cleanName}
                         </h4>
-                        <p className={`text-[10px] font-medium mt-0.5 uppercase tracking-wider ${metricColorClass}`}>
+                        <p className={`hidden sm:block text-[10px] font-medium mt-0.5 uppercase tracking-wider ${metricColorClass}`}>
                           {place.address.split(',')[0]}
                         </p>
                       </div>
-                      <div className="flex flex-col items-end shrink-0 mt-1 gap-1">
-                        <span className={`w-2 h-2 rounded-full shadow-sm ${dotGlowClass}`} />
-                        <span className="text-[8.5px] font-mono font-bold text-zinc-500 bg-zinc-900/80 px-1.5 py-0.5 rounded border border-zinc-800/80 leading-none">
+                      <div className="flex flex-col items-end shrink-0 gap-1 mt-0.5">
+                        <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full shadow-sm ${dotGlowClass}`} />
+                        <span className="hidden sm:inline-block text-[8.5px] font-mono font-bold text-zinc-500 bg-zinc-900/80 px-1.5 py-0.5 rounded border border-zinc-800/80 leading-none">
                           {place.reportsCount || 1} Sub{(place.reportsCount || 1) !== 1 ? 's' : ''}
                         </span>
                       </div>
                     </div>
 
                     {/* Middle row: Large Metric and Operational status tracking */}
-                    <div className="flex items-end justify-between mt-4">
+                    <div className="flex items-center sm:items-end justify-between mt-2.5 sm:mt-4">
                       <div className="flex flex-col">
-                        <span className={`text-xl font-bold tracking-tight leading-none ${metricColorClass}`}>
-                          {place.waitMinutes} <span className="text-[9px] font-semibold tracking-wide uppercase ml-0.5">min</span>
+                        <span className={`text-xs sm:text-xl font-bold tracking-tight leading-none ${metricColorClass}`}>
+                          {place.waitMinutes} <span className="text-[7.5px] sm:text-[9px] font-semibold tracking-wide uppercase sm:ml-0.5">min</span>
                         </span>
-                        <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider mt-1">
+                        <span className="hidden sm:block text-[9px] text-zinc-500 font-bold uppercase tracking-wider mt-1">
                           WAIT DURATION
                         </span>
                       </div>
                       <div className="flex flex-col items-end">
-                        <span className={`text-[10px] font-bold tracking-wider uppercase ${metricColorClass}`}>
+                        <span className={`text-[8.5px] sm:text-[10px] font-bold tracking-wider uppercase ${metricColorClass}`}>
                           {place.crowdStatus}
                         </span>
-                        <span className="text-[9px] text-zinc-500 font-bold tracking-wider mt-1 uppercase">
+                        <span className="hidden sm:block text-[9px] text-zinc-500 font-bold tracking-wider mt-1 uppercase">
                           CROWD DENSITY
                         </span>
                       </div>
                     </div>
 
-                    {/* Footer live inspect status button */}
-                    <div className="mt-4 border-t border-zinc-900 pt-3">
+                    {/* Footer live inspect status button - Desktop only */}
+                    <div className="hidden sm:block mt-4 border-t border-zinc-900 pt-3">
                       <button
                         type="button"
-                        onClick={() => {
-                          dispatch(setSelectedPlaceId(place.id));
-                          setDetailPlace(place);
-                        }}
                         className="w-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-800/80 hover:border-zinc-700/80 text-zinc-300 hover:text-white text-[10px] font-bold uppercase tracking-wider py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-[0.98]"
                       >
                         Inspect Live Status
@@ -1665,6 +1665,13 @@ export default function Dashboard() {
                     <span className="text-[9px] uppercase font-bold tracking-wider text-zinc-500">Wait Duration</span>
                     <span className="text-xs font-extrabold text-zinc-200">
                       {detailPlace.waitMinutes} minutes
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-zinc-900/80 pt-2">
+                    <span className="text-[9px] uppercase font-bold tracking-wider text-zinc-500">Submissions</span>
+                    <span className="text-xs font-extrabold text-zinc-200 font-mono">
+                      {detailPlace.reportsCount || 1} report{(detailPlace.reportsCount || 1) !== 1 ? 's' : ''}
                     </span>
                   </div>
                 </div>

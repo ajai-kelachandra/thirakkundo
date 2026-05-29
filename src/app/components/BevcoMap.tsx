@@ -489,7 +489,7 @@ export default function BevcoMap() {
         </div>
 
         {/* Details & Listing Sidebar (4 Cols) */}
-        <div className="lg:col-span-4 flex flex-col gap-4">
+        <div className="hidden lg:flex lg:col-span-4 flex-col gap-4">
           
           {/* Active Detail Display */}
           <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-xl p-4 flex flex-col gap-3 min-h-[160px] relative overflow-hidden">
