@@ -1591,8 +1591,13 @@ export default function Dashboard() {
                           {place.address.split(',')[0]}
                         </p>
                       </div>
-                      <div className="flex flex-col items-end shrink-0 gap-1 mt-0.5">
-                        <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full shadow-sm ${dotGlowClass}`} />
+                      <div className="flex flex-col items-end shrink-0 gap-1.5 mt-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[8px] sm:text-[9px] font-normal text-white tracking-wider  leading-none">
+                            {timeLabel}
+                          </span>
+                          <span className={`w-0.5 h-0.5 sm:w-1 sm:h-1 rounded-full shadow-sm ${dotGlowClass}`} />
+                        </div>
                         <span className="hidden sm:inline-block text-[8.5px] font-mono font-bold text-zinc-500 bg-zinc-900/80 px-1.5 py-0.5 rounded border border-zinc-800/80 leading-none">
                           {place.reportsCount || 1} Sub{(place.reportsCount || 1) !== 1 ? 's' : ''}
                         </span>
