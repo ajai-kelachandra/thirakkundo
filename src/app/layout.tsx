@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "തിരക്കുണ്ടോ? | Thirakkundo - Live BEVCO Queue & Crowd Status Tracker Kerala",
+  title: "Thirakkundo - Live BEVCO Queue & Crowd Status Tracker Kerala",
   description: "Check live crowd density, queue length, and stock availability at BEVCO (liquor outlets) and local stores across Kerala. Get real-time crowd-sourced wait times from fellow citizens. ഒഴിവാക്കൂ നീണ്ട ക്യൂകൾ!",
   keywords: [
     "thirakkundo", 
