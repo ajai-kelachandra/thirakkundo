@@ -57,6 +57,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://thirakkundo.in",
   },
+  icons: {
+    icon: "/Q.svg",
+    shortcut: "/Q.svg",
+    apple: "/Q.svg",
+  },
 };
 
 export default function RootLayout({
