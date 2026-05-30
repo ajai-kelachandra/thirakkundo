@@ -86,6 +86,18 @@ export default function RootLayout({
             })
           }}
         />
+        {/* Google Analytics (gtag.js) */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DP2MH6HS28" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-DP2MH6HS28');
+            `
+          }}
+        />
         <StoreProvider>
           {children}
         </StoreProvider>
