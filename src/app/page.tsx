@@ -931,6 +931,22 @@ export default function Dashboard() {
       }
     }
 
+    // Track custom Google Analytics 4 (GA4) event
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      try {
+        (window as any).gtag('event', 'submit_report', {
+          outlet_id: targetId,
+          outlet_name: reportOutletName,
+          crowd_status: reportStatus,
+          wait_minutes: Number(reportWait),
+          district: guessedDistrict,
+          pincode: reportPincode
+        });
+      } catch (err) {
+        console.warn('Failed to track GA4 submit event:', err);
+      }
+    }
+
     // Push report to Supabase in parallel if configured
     if (isSupabaseConfigured) {
       supabase
