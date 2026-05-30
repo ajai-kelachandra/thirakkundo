@@ -1232,21 +1232,24 @@ export default function Dashboard() {
                               </span>
                             </div>
                           </div>
-
                           {!hasActiveReports ? (
-                            /* Clean Empty State - No Fake Placeholder metrics shown */
-                            <div className="py-7 px-4 bg-zinc-950/50 border border-zinc-900/80 rounded-2xl text-center flex flex-col gap-2.5 items-center justify-center animate-fade-in">
-                              <span className="text-2xl mt-1">📢</span>
-                              <div>
-                                <h4 className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-wider">No Active Reports Yet</h4>
-                                <p className="text-[10px] text-zinc-500 max-w-[200px] leading-relaxed mt-1 mx-auto">
-                                  No real-time crowd or queue updates have been submitted for this outlet in the last 10 minutes.
-                                </p>
-                              </div>
+                            /* When no active reports exist, show a direct, simple text message and action button to prevent showing fake metrics */
+                            <div className="flex flex-col gap-3 py-4 text-center items-center justify-center animate-fade-in">
+                              <p className="text-[11px] text-zinc-400 max-w-[280px] leading-relaxed">
+                                No real-time crowd or queue updates have been submitted for this outlet in the last 10 minutes.
+                              </p>
+                              
+                              <button
+                                type="button"
+                                onClick={() => setActiveFormTab('reporting')}
+                                className="w-full mt-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-950 text-xs font-bold py-2.5 rounded-xl shadow-lg transition-all uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                              >
+                                Submit First Status Report
+                              </button>
                             </div>
                           ) : (
-                            /* Live Metrics Cards Grid */
-                            <>
+                            /* Live Metrics Cards Grid - shown ONLY when active reports exist */
+                            <div className="flex flex-col gap-3.5 animate-fade-in">
                               {/* Dynamic Queue Density Metric Counters */}
                               <div className="grid grid-cols-2 gap-3">
                                 <div className="bg-zinc-900/20 border border-zinc-850 p-3 rounded-xl flex flex-col gap-1 items-center text-center justify-center">
@@ -1283,26 +1286,26 @@ export default function Dashboard() {
                                   </div>
                                 )}
                               </div>
-                            </>
+
+                              {/* Last updated timing stats */}
+                              <div className="flex items-center justify-between px-1 text-[10px] text-zinc-500 border-t border-zinc-900 pt-3">
+                                <span className="flex items-center gap-1">
+                                  <span>Reported:</span>
+                                  <span className="font-bold text-zinc-400">{timeLabel}</span>
+                                </span>
+                                <span>{selectedPlace.reportsCount || 0} crowd report{selectedPlace.reportsCount !== 1 ? 's' : ''}</span>
+                              </div>
+
+                              {/* Action Button transition to reporting tab */}
+                              <button
+                                type="button"
+                                onClick={() => setActiveFormTab('reporting')}
+                                className="w-full mt-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-950 text-xs font-bold py-2.5 rounded-xl shadow-lg transition-all uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                              >
+                                Submit Wait Time Update
+                              </button>
+                            </div>
                           )}
-
-                          {/* Last updated timing stats */}
-                          <div className="flex items-center justify-between px-1 text-[10px] text-zinc-500 border-t border-zinc-900 pt-3">
-                            <span className="flex items-center gap-1">
-                              <span>Reported:</span>
-                              <span className="font-bold text-zinc-400">{timeLabel}</span>
-                            </span>
-                            <span>{selectedPlace.reportsCount || 0} crowd report{selectedPlace.reportsCount !== 1 ? 's' : ''}</span>
-                          </div>
-
-                          {/* Action Button transition to reporting tab */}
-                          <button
-                            type="button"
-                            onClick={() => setActiveFormTab('reporting')}
-                            className="w-full mt-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-950 text-xs font-bold py-2.5 rounded-xl shadow-lg transition-all uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
-                          >
-                             {hasActiveReports ? 'Submit Wait Time Update' : 'Submit First Status Report'}
-                          </button>
                         </div>
                       );
                     })()
@@ -1554,7 +1557,7 @@ export default function Dashboard() {
             </div>
 
             {/* Grid display layout (Spans 3 cols on mobile, and 2-4 cols on desktop to keep boxes wide and proportional) */}
-            <div className="grid grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-5">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-5">
               {reportedPlaces.map((place) => {
                 const minutesAgo = place.reportedAtTimestamp
                   ? Math.floor((Date.now() - place.reportedAtTimestamp) / 60000)
