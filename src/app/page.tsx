@@ -118,7 +118,7 @@ export default function Dashboard() {
   const selectedPlaceId = useAppSelector((state) => state.ui.selectedPlaceId);
 
   // Local state for tracking overall historical database report count
-  const [dbReportCount, setDbReportCount] = useState<number>(131); // Default to local mock catalog sum (42 + 89)
+  const [dbReportCount, setDbReportCount] = useState<number>(0); // Default to local mock catalog sum (42 + 89)
 
   // Sync historical total report count from Supabase
   useEffect(() => {
@@ -884,7 +884,28 @@ export default function Dashboard() {
       }
     }
 
-
+    // Client-side rate-limiting / spam protection (3-minute cooldown per outlet)
+    if (typeof window !== 'undefined') {
+      try {
+        const cooldownData = localStorage.getItem('thirakkundo_cooldowns');
+        if (cooldownData) {
+          const cooldowns = JSON.parse(cooldownData);
+          const lastSubmitted = cooldowns[targetId];
+          if (lastSubmitted) {
+            const timePassed = Date.now() - Number(lastSubmitted);
+            const cooldownDuration = 3 * 60 * 1000; // 3 minutes cooldown
+            if (timePassed < cooldownDuration) {
+              const secondsLeft = Math.ceil((cooldownDuration - timePassed) / 1000);
+              const minutesLeft = Math.ceil(secondsLeft / 60);
+              setFormError(`Please wait ${secondsLeft > 60 ? `${minutesLeft}m` : `${secondsLeft}s`} before submitting another report for this outlet.`);
+              return;
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to parse report cooldowns:', err);
+      }
+    }
 
     dispatchWithLog(addCustomPlaceReport({
       id: targetId,
@@ -897,6 +918,18 @@ export default function Dashboard() {
       district: guessedDistrict,
       notAvailableItems: notAvailableArr
     }));
+
+    // Record submission timestamp for client-side rate limiting
+    if (typeof window !== 'undefined') {
+      try {
+        const cooldownData = localStorage.getItem('thirakkundo_cooldowns');
+        const cooldowns = cooldownData ? JSON.parse(cooldownData) : {};
+        cooldowns[targetId] = Date.now();
+        localStorage.setItem('thirakkundo_cooldowns', JSON.stringify(cooldowns));
+      } catch (err) {
+        console.warn('Failed to save cooldown status:', err);
+      }
+    }
 
     // Push report to Supabase in parallel if configured
     if (isSupabaseConfigured) {
@@ -1544,7 +1577,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-bold text-zinc-200 text-sm flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                  <span className="w-1 h-1 rounded-full bg-emerald-500 animate-ping" />
                   Recent Updates
                 </h3>
                 <p className="text-xs text-zinc-500 mt-0.5">
