@@ -1243,7 +1243,7 @@ export default function Dashboard() {
                       return (
                         <div className="flex flex-col gap-4">
                           {/* Selected Shop Info Card */}
-                          <div className="bg-zinc-900/35 border border-zinc-850 p-3.5 rounded-xl flex justify-between items-start gap-2">
+                          <div className="bg-zinc-900/35 border-[0.25px] border-zinc-400 p-3.5 rounded-xl flex justify-between items-start gap-2">
                             <div className="min-w-0">
                               <h4 className="text-xs font-extrabold text-zinc-200 truncate">
                                 {selectedPlace.name.replace('BEVCO Outlet, ', '')}
@@ -1285,7 +1285,7 @@ export default function Dashboard() {
                             <div className="flex flex-col gap-3.5 animate-fade-in">
                               {/* Dynamic Queue Density Metric Counters */}
                               <div className="grid grid-cols-2 gap-3">
-                                <div className="bg-zinc-900/20 border border-zinc-850 p-3 rounded-xl flex flex-col gap-1 items-center text-center justify-center">
+                                <div className="bg-zinc-900/20 border-[0.25px] border-zinc-400 p-3 rounded-xl flex flex-col gap-1 items-center text-center justify-center">
                                   <span className="text-[9px] uppercase font-bold tracking-wider text-zinc-500">Queue Density</span>
                                   <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-wide mt-1.5 ${crowdBgMap[selectedPlace.crowdStatus] ?? crowdBgMap.empty}`}>
                                     <span className={`w-1.5 h-1.5 rounded-full ${crowdGlowMap[selectedPlace.crowdStatus] ?? 'bg-zinc-500'}`} />
@@ -1293,7 +1293,7 @@ export default function Dashboard() {
                                   </span>
                                 </div>
 
-                                <div className="bg-zinc-900/20 border border-zinc-850 p-3 rounded-xl flex flex-col gap-1 items-center text-center justify-center">
+                                <div className="bg-zinc-900/20 border-[0.25px] border-zinc-400 p-3 rounded-xl flex flex-col gap-1 items-center text-center justify-center">
                                   <span className="text-[9px] uppercase font-bold tracking-wider text-zinc-500">Wait Duration</span>
                                   <span className="text-base font-extrabold text-zinc-200 mt-1">
                                     {selectedPlace.waitMinutes} <span className="text-[10px] text-zinc-500 font-bold uppercase">min</span>
@@ -1302,7 +1302,7 @@ export default function Dashboard() {
                               </div>
 
                               {/* Unavailable items report list */}
-                              <div className="bg-zinc-900/20 border border-zinc-850 p-3 rounded-xl flex flex-col gap-2">
+                              <div className="bg-zinc-900/20 border-[0.25px] border-zinc-400 p-3 rounded-xl flex flex-col gap-2">
                                 <span className="text-[9px] uppercase font-bold tracking-wider text-zinc-500">Out of Stock Items</span>
                                 {selectedPlace.notAvailableItems && selectedPlace.notAvailableItems.length > 0 ? (
                                   <div className="flex flex-wrap gap-1.5 mt-1">
