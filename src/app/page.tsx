@@ -1063,7 +1063,7 @@ export default function Dashboard() {
           
           {/* Search Outlets Card */}
           <div className="glass rounded-2xl overflow-hidden border border-white/5 shadow-2xl relative flex flex-col transition-all duration-300">
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-zinc-800" />
+            <div className="absolute top-0 left-0 right-0 h-0.5" />
             <div className="p-5 flex flex-col gap-4">
               <div>
                 <h3 className="font-bold text-zinc-200 text-sm flex items-center gap-2">
@@ -1143,7 +1143,7 @@ export default function Dashboard() {
           <div className="glass rounded-2xl overflow-hidden border border-white/5 shadow-2xl relative flex flex-col transition-all duration-300">
             
             {/* Top Decorative Border Line */}
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-zinc-800" />
+            <div className="absolute top-0 left-0 right-0 h-0.5 " />
             
             {/* Tab Bar Navigation */}
             <div className="flex border-b border-zinc-900 bg-zinc-950/40 p-1">
@@ -1728,6 +1728,11 @@ export default function Dashboard() {
             <span>Instagram</span>
           </a>
         </div>
+
+        {/* Malayalam Health Warning */}
+        <p className="text-xs sm:text-xs font-bold text-zinc-400 tracking-wider text-center mt-2" style={{ fontFamily: "'Baloo Chettan 2', sans-serif" }}>
+          മദ്യപാനം <span className="text-red-500"> ആരോഗ്യത്തിന് </span>ഹാനികരം
+        </p>
 
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between w-full max-w-3xl gap-2 px-1">
