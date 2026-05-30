@@ -1960,14 +1960,14 @@ export default function Dashboard() {
                   
                   {/* Left Column: Description & Options Selector */}
                   <div className="md:col-span-7 flex flex-col gap-4">
-                    <div className="flex flex-col gap-1.5">
+                    {/* <div className="flex flex-col gap-1.5">
                       <div className="bg-zinc-900/40 border border-zinc-800/80 text-zinc-400 text-[9px] font-medium py-2 px-3 rounded-xl flex items-center gap-1.5 leading-none w-fit">
                         <svg className="w-3 h-3 shrink-0 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3.5">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                         <span>Every contribution helps keep the service running.</span>
                       </div>
-                    </div>
+                    </div> */}
 
                     {/* Options List */}
                     <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto pr-1 custom-scrollbar">
