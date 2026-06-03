@@ -1750,7 +1750,7 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Creator Links: Buy Me A Coffee & Instagram */}
+        {/* Creator Links: Buy Me A Coffee */}
         <div className="mt-3 mb-1 flex flex-wrap items-center justify-center gap-3 animate-fade-in">
           {/* Buy Me A Coffee - Simple Minimal Style Button */}
           <button
@@ -1761,21 +1761,6 @@ export default function Dashboard() {
             <span className="text-[11px]">☕</span>
             <span>Buy Me A Coffee</span>
           </button>
-
-          {/* Instagram - Simple Minimal Style */}
-          <a
-            href="https://www.instagram.com/ajaykc_?igsh=MTl5NzB3d21zd29tYQ%3D%3D&utm_source=qr"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 bg-zinc-900/30 hover:bg-zinc-900/60 border border-zinc-800/80 hover:border-zinc-700/60 text-zinc-400 hover:text-rose-400 text-[10px] font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-[0.98]"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.2">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-              <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
-              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-            </svg>
-            <span>Instagram</span>
-          </a>
         </div>
 
         {/* Malayalam Health Warning */}
